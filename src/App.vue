@@ -1,5 +1,6 @@
 <script setup>
   import { ref } from 'vue' // 引入 Vue 的核心魔法棒
+  import MyButton from './components/MyButton.vue'
 
   // 定义一个“会动的变量” (响应式变量)
   // ref(0) 意思是初始值是 0
@@ -31,10 +32,13 @@
 
     <h2 v-if="count>=10" style="color:red">🎉 恭喜你达成目标！</h2>
 
-    <button @click="add">点我 +1</button>
+    <div class="buttons">
+      <MyButton @click="add" text="点我 +1" />
+      <MyButton @click="reset" text="重置" v-if="count > 0"/>
+    </div>
+    <!-- <button @click="add">点我 +1</button>
     <button @click="reset" v-if="count>0" style="background-color: #e74c3c;">重置</button>
-  
-    <div class="buttons"></div>
+   -->
     <div style="margin-top: 30px;text-align: left;">
       <h3>📜 操作日志</h3>
       <ul>
