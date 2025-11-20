@@ -48,65 +48,95 @@
 </script>
 
 <template>
-  <div class="container">
-    <h1>Hello,{{ name }}</h1>
-    <input v-model="name" type="text" placeholder="请输入你的名字" style="padding: 10px;font-size: 18px;"></input>
+  <div class="app-container">
     
-    <p class="number">{{ count }}</p>
+    <el-card class="box-card" style="max-width: 480px; margin: 0 auto;">
+      <template #header>
+        <div class="card-header">
+          <span>🏆 Vue 进阶练习</span>
+        </div>
+      </template>
 
-    <h2 v-if="count>=10" style="color:red">🎉 恭喜你达成目标！</h2>
-
-    <div class="buttons">
-      <MyButton @click="add" text="点我 +1" />
-      <MyButton @click="reset" text="重置" v-if="count > 0"/>
-    </div>
-
-
-    <hr style="margin: 30px 0;">
-      <div style="text-align: center;">
-        <h3>🐱 每日吸猫</h3>
-        <img :src="catImage" style="width: 300px; height: 300px;"/>
-        <br><br>
-        <MyButton text="换一只猫" @click="getCat"/>
+      <div style="margin-bottom: 20px;">
+        <el-input 
+          v-model="name" 
+          placeholder="请输入你的大名" 
+          clearable
+          size="large"
+        >
+          <template #prepend>用户</template>
+        </el-input>
       </div>
-    <hr style="margin: 30px 0;">
-    
-    <!-- <button @click="add">点我 +1</button>
-    <button @click="reset" v-if="count>0" style="background-color: #e74c3c;">重置</button>
-   -->
-    <div style="margin-top: 30px;text-align: left;">
-      <h3>📜 操作日志</h3>
-      <ul>
-        <li v-for="(item,index) in logs">
-          第{{ index+1 }}次操作：{{ item}}
-        </li>
-      </ul>
-    </div>
+
+      <div style="text-align: center;">
+        <h1>Hello, {{ name }}</h1>
+        <p class="number" :style="{ color: count > 10 ? '#f56c6c' : '#409eff' }">
+          {{ count }}
+        </p>
+        
+        <el-button type="primary" size="large" @click="add" round>点我 +1</el-button>
+        <el-button type="danger" size="large" @click="reset" v-if="count > 0" circle>重置</el-button>
+      </div>
+
+      <el-divider /> <div style="text-align: center;">
+        <h4>🐱 每日吸猫</h4>
+        <el-image 
+          style="width: 200px; height: 200px; border-radius: 8px;"
+          :src="catImage" 
+          :preview-src-list="[catImage]"
+          fit="cover"
+        >
+          <template #error>
+            <div class="image-slot">😿 加载失败</div>
+          </template>
+        </el-image>
+        <br><br>
+        <el-button type="success" @click="getCat" :loading="isLoading" round>
+          {{ isLoading ? '抓取中...' : '换一只猫' }}
+        </el-button>
+      </div>
+
+      <el-divider content-position="left">操作日志</el-divider>
+
+      <div style="height: 200px; overflow-y: auto;">
+        <el-timeline>
+          <el-timeline-item
+            v-for="(item, index) in logs"
+            :key="index"
+            :type="index === logs.length - 1 ? 'primary' : ''"
+            :timestamp="'第 ' + (index + 1) + ' 次'"
+          >
+            {{ item }}
+          </el-timeline-item>
+        </el-timeline>
+      </div>
+
+    </el-card>
   </div>
 </template>
 
 <style scoped>
-  .container {
-    text-align: center;
-    margin-top: 60px;
-    font-family: sans-serif;
-  }
-  .number {
-    font-size: 80px;
-    color: #42b883;
-    font-weight: bold;
-    margin: 20px 0;
-  }
-  button {
-    font-size: 20px;
-    padding: 10px 30px;
-    cursor: pointer;
-    background-color: #333;
-    color: white;
-    border: none;
-    border-radius: 5px;
-  }
-  button:hover {
-    background-color: #555;
-  }
+.app-container {
+  padding: 40px;
+  background-color: #f0f2f5; /* 浅灰色背景 */
+  min-height: 100vh;
+}
+
+.number {
+  font-size: 60px;
+  font-weight: bold;
+  margin: 10px 0;
+  transition: color 0.3s;
+}
+
+/* 修复 image error 插槽的样式 */
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  color: #909399;
+}
 </style>
