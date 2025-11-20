@@ -22,8 +22,10 @@
       // const response = await fetch('http://127.0.0.1:8000/cat?json=true')
 
       // 现在找云端的API,https://my-python-backend-你的名字.vercel.app
-      const response = await fetch('https://my-python-backend-wine.vercel.app/cat?json=true')
+      //const response = await fetch('https://my-python-backend-wine.vercel.app/cat?json=true')
 
+      // 现在使用自己的域名，让其他人不用挂梯子也可以访问
+      const response = await fetch('https://api.liberflux.top/cat?json=true')
       const data = await response.json()
 
       // catImage.value='https://cataas.com/cat/'+data._id
