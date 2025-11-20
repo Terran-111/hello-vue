@@ -1,6 +1,5 @@
 <script setup>
   import { ref ,onMounted } from 'vue' // 引入 Vue 的核心魔法棒
-  import MyButton from './components/MyButton.vue'
 
   // 定义一个“会动的变量” (响应式变量)
   // ref(0) 意思是初始值是 0
@@ -9,24 +8,38 @@
 
   const logs = ref([])
 
+  const isLoading = ref(false)
   // 1.新增：变量存储图片地址
    const catImage = ref('')
 
    // 2.新增：“抓猫”函数
    async function getCat(){
+    isLoading.value = true
     try{
-      const response = await fetch('https://cataas.com/cat?json=true')
+      // const response = await fetch('https://cataas.com/cat?json=true')
+
+      // 以前是找cataas.com的API，现在我们用自家兄弟Python (8000端口)
+      // const response = await fetch('http://127.0.0.1:8000/cat?json=true')
+
+      // 现在找云端的API,https://my-python-backend-你的名字.vercel.app
+      const response = await fetch('https://my-python-backend-wine.vercel.app/cat?json=true')
+
       const data = await response.json()
 
       // catImage.value='https://cataas.com/cat/'+data._id
       // 直接使用API返回完整的URL
-      catImage.value=data.url
+      // catImage.value=data.url
+      catImage.value=data.image
     
-      logs.value.push('抓到了一只新猫猫！')
-    } catch(e){
-      console.log('抓猫失败：',e)
+      logs.value.push(data.note)
+
+    } catch (e) {
+      console.log("出错了", e)
+      logs.value.push("连不上后端，请检查 Python 跑起来没？")
+    } finally {
+      isLoading.value = false
     }
-   }
+  }
 
   // 定义一个函数：点击后执行什么
   function add() {
