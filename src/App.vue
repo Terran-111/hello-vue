@@ -6,13 +6,19 @@
   const count = ref(0)
   const name = ref("Vue新手 ")
 
+  const logs = ref([])
+
   // 定义一个函数：点击后执行什么
   function add() {
     count.value = count.value + 1
     console.log("现在的数字是：", count.value)
+
+    logs.value.push("你点击了按钮，数字变成了"+count.value)
   }
   function reset(){
     count.value=0
+
+    logs.value=[]
   }
 </script>
 
@@ -27,6 +33,16 @@
 
     <button @click="add">点我 +1</button>
     <button @click="reset" v-if="count>0" style="background-color: #e74c3c;">重置</button>
+  
+    <div class="buttons"></div>
+    <div style="margin-top: 30px;text-align: left;">
+      <h3>📜 操作日志</h3>
+      <ul>
+        <li v-for="(item,index) in logs">
+          第{{ index+1 }}次操作：{{ item}}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
