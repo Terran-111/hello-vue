@@ -10,6 +10,9 @@
     count.value = count.value + 1
     console.log("现在的数字是：", count.value)
   }
+  function reset(){
+    count.value=0
+  }
 </script>
 
 <template>
@@ -19,6 +22,7 @@
     <p class="number">{{ count }}</p>
 
     <button @click="add">点我 +1</button>
+    <button @click="reset">重置</button>
   </div>
 </template>
 
