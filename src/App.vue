@@ -1,47 +1,49 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+  import { ref } from 'vue' // 引入 Vue 的核心魔法棒
+
+  // 定义一个“会动的变量” (响应式变量)
+  // ref(0) 意思是初始值是 0
+  const count = ref(0)
+
+  // 定义一个函数：点击后执行什么
+  function add() {
+    count.value = count.value + 1
+    console.log("现在的数字是：", count.value)
+  }
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="container">
+    <h1>Vue 计数器</h1>
+    
+    <p class="number">{{ count }}</p>
 
-    <div class="wrapper">
-      <HelloWorld msg="你好世界！我是未来的Vue大神！" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+    <button @click="add">点我 +1</button>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+  .container {
+    text-align: center;
+    margin-top: 60px;
+    font-family: sans-serif;
   }
-
-  .logo {
-    margin: 0 2rem 0 0;
+  .number {
+    font-size: 80px;
+    color: #42b883;
+    font-weight: bold;
+    margin: 20px 0;
   }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+  button {
+    font-size: 20px;
+    padding: 10px 30px;
+    cursor: pointer;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
   }
-}
+  button:hover {
+    background-color: #555;
+  }
 </style>
