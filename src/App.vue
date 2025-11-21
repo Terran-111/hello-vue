@@ -1,19 +1,21 @@
 <script setup>
   import { ref ,onMounted } from 'vue' // 引入 Vue 的核心魔法棒
 
-  // 定义一个“会动的变量” (响应式变量)
-  // ref(0) 意思是初始值是 0
   const count = ref(0)
-  const name = ref("Vue新手 ")
-
+  const name = ref("Vue全栈 ")
   const logs = ref([])
-
+  const catImage = ref('')
   const isLoading = ref(false)
-  // 1.新增：变量存储图片地址
-   const catImage = ref('')
 
-   // 2.新增：“抓猫”函数
-   async function getCat(){
+  const chatInput=ref('')
+  const isChatting =ref(false)
+  const chatHistory = ref([
+    { role: 'ai', content: '喵？我是你的 AI 助手，有什么想聊的吗？' }
+  ])
+  // 用于自动滚动到底部
+  const chatBoxRef = ref(null)
+
+  async function getCat(){
     isLoading.value = true
     try{
       // const response = await fetch('https://cataas.com/cat?json=true')
@@ -43,6 +45,42 @@
     }
   }
 
+  // --- 新增：AI 聊天功能 ---
+  async function sendMessage(){
+    if (!chatInput.value.trim()) return
+
+    const userMsg = chatInput.value
+    chatHistory.value.push({role:'user',content:userMsg})
+    chatInput.value=''
+    isChatting.value=true
+    scrollToBottom()
+    try{
+      // 发给后端
+      const response = await fetch('https://api.liberflux.top/chat', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:userMsg})
+      })
+      const data = await response.json()
+      // 显示AI回复
+      chatHistory.value.push({role:'ai',content:data.reply})
+    } catch (e) {
+      chatHistory.value.push({ role: 'ai', content: '喵...网络好像卡住了，请稍后再试。' })
+    } finally{
+      isChatting.value = false
+      scrollToBottom()
+    }
+  }
+
+  // 辅助函数：让聊天框自动滚到底部
+  function scrollToBottom(){
+    nextTick(()=>{
+      if(chatBoxRef.value){
+        chatBoxRef.value.scrollTop = chatBoxRef.value.scrollHeight
+      }
+    })
+  }
+
   // 定义一个函数：点击后执行什么
   function add() {
     count.value = count.value + 1
@@ -68,7 +106,7 @@
     <el-card class="box-card" style="max-width: 480px; margin: 0 auto;">
       <template #header>
         <div class="card-header">
-          <span>🏆 Vue 进阶练习</span>
+          <span>🏆 全栈AI 助手喵</span>
         </div>
       </template>
 
@@ -93,7 +131,40 @@
         <el-button type="danger" size="large" @click="reset" v-if="count > 0" circle>重置</el-button>
       </div>
 
-      <el-divider /> <div style="text-align: center;">
+      <el-divider />
+
+      <div class="chat-section">
+        <h4>💬 和 AI 聊两句</h4>
+        
+        <div class="chat-window" ref="chatBoxRef">
+          <div 
+            v-for="(msg, index) in chatHistory" 
+            :key="index"
+            class="message-row"
+            :class="msg.role === 'user' ? 'my-msg' : 'ai-msg'"
+          >
+            <div class="bubble">
+              {{ msg.content }}
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <el-input 
+            v-model="chatInput" 
+            placeholder="问我任何问题..." 
+            @keyup.enter="sendMessage"
+            :disabled="isChatting"
+          />
+          <el-button type="primary" @click="sendMessage" :loading="isChatting">
+            发送
+          </el-button>
+        </div>
+      </div>
+
+      <el-divider /> 
+
+      <div style="text-align: center;">
         <h4>🐱 每日吸猫</h4>
         <el-image 
           style="width: 200px; height: 200px; border-radius: 8px;"
@@ -153,5 +224,43 @@
   height: 100%;
   background: #f5f7fa;
   color: #909399;
+}
+
+/* 聊天窗口样式 */
+.chat-window {
+  height: 300px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  background: #fff;
+  margin-bottom: 10px;
+}
+.message-row {
+  display: flex;
+  margin-bottom: 10px;
+}
+.my-msg {
+  justify-content: flex-end; /* 我发的消息靠右 */
+}
+.ai-msg {
+  justify-content: flex-start; /* AI发的消息靠左 */
+}
+.bubble {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.my-msg .bubble {
+  background-color: #409eff;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+.ai-msg .bubble {
+  background-color: #f4f4f5;
+  color: #333;
+  border-bottom-left-radius: 2px;
 }
 </style>
