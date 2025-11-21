@@ -1,5 +1,5 @@
 <script setup>
-  import { ref ,onMounted } from 'vue' // 引入 Vue 的核心魔法棒
+  import { ref ,onMounted,nextTick } from 'vue' // 引入 Vue 的核心魔法棒
 
   const count = ref(0)
   const name = ref("Vue全栈 ")
@@ -50,13 +50,20 @@
     if (!chatInput.value.trim()) return
 
     const userMsg = chatInput.value
-    chatHistory.value.push({role:'user',content:userMsg})
     chatInput.value=''
     isChatting.value=true
 
-    // 1. 先放一个空的 AI 气泡占位
-    const aiMsgIndex = chatHistory.value.push({ role: 'ai', content: '' }) - 1
-    scrollToBottom()
+    // 添加用户消息
+    chatHistory.value.push({
+      role: 'user',
+      content: userMsg
+    })
+    // 添加AI消息（初始为空）
+    const aiMsgIndex = chatHistory.value.length
+    chatHistory.value.push({
+      role: 'assistant',
+      content: ''
+    })
     try{
       // 发给后端
       const response = await fetch('https://api.liberflux.top/chat', {
@@ -64,7 +71,10 @@
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({message:userMsg})
       })
-      // 拿到阅读器
+      if (!response.ok) {
+        throw new Error('网络请求失败')
+      }
+      // 处理流式响应
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
 
@@ -81,6 +91,7 @@
       chatHistory.value[aiMsgIndex].content = '喵？出错了，请重试喵~'
     } finally{
       isChatting.value = false
+      scrollToBottom()
     }
   }
 
