@@ -53,6 +53,9 @@
     chatHistory.value.push({role:'user',content:userMsg})
     chatInput.value=''
     isChatting.value=true
+
+    // 1. 先放一个空的 AI 气泡占位
+    const aiMsgIndex = chatHistory.value.push({ role: 'ai', content: '' }) - 1
     scrollToBottom()
     try{
       // 发给后端
@@ -61,14 +64,23 @@
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({message:userMsg})
       })
-      const data = await response.json()
-      // 显示AI回复
-      chatHistory.value.push({role:'ai',content:data.reply})
+      // 拿到阅读器
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+
+      // 循环读取数据流
+      while(true){
+        const {done,value}=await reader.read()
+        if (done) break
+        // 解码并追加到对话框中
+        const text = decoder.decode(value)
+        chatHistory.value[aiMsgIndex].content += text
+        scrollToBottom() // 有新字就滚到底部
+      }
     } catch (e) {
-      chatHistory.value.push({ role: 'ai', content: '喵...网络好像卡住了，请稍后再试。' })
+      chatHistory.value[aiMsgIndex].content = '喵？出错了，请重试喵~'
     } finally{
       isChatting.value = false
-      scrollToBottom()
     }
   }
 
@@ -228,7 +240,7 @@
 
 /* 聊天窗口样式 */
 .chat-window {
-  height: 300px;
+  height: 200px;
   border: 1px solid #eee;
   border-radius: 8px;
   padding: 10px;
