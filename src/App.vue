@@ -1,7 +1,7 @@
 <script setup>
   import { ref ,onMounted,nextTick } from 'vue' 
   // 引入漂亮的图标
-  import { User, Service, Refresh, Position, ChatLineRound, Trophy } from '@element-plus/icons-vue'
+  import { User, Service, Refresh, Position, ChatLineRound, Trophy,Delete } from '@element-plus/icons-vue'
   // 1.基础数据
   const count = ref(0)
   const name = ref("")
@@ -25,7 +25,7 @@
 
       catImage.value=data.image
       //logs.value.push(data.note)
-      logs.unshift(data.note)// unshift 把日志加到最前面，方便看
+      logs.value.unshift(data.note)// unshift 把日志加到最前面，方便看
 
     } catch (e) {
       console.log("出错了", e)
@@ -106,12 +106,12 @@
   // 定义一个函数：点击后执行什么
   function add() {
     count.value = count.value + 1
-    logs.unshift(`✨ 摸鱼能量 +1，当前：${count.value}`)
+    logs.value.unshift(`✨ 摸鱼能量 +1，当前：${count.value}`)
   }
 
   function reset(){
     count.value=0
-    logs.unshift("🔄 能量归零啦")
+    logs.value.unshift("🔄 能量归零啦")
   }
 
   // 使用 onMounted() ,页面加载完成，自动执行一些初始化操作
