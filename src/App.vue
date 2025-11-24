@@ -13,7 +13,7 @@
   const chatInput=ref('')
   const isChatting =ref(false)
   const chatHistory = ref([
-    { role: 'ai', content: '喵？我是你的 AI 助手，有什么想聊的吗？' }
+    { role: 'assistant', content: '喵？我是你的 AI 助手，有什么想聊的吗？' }
   ])
   const chatBoxRef = ref(null)
   // 3.抓猫逻辑
@@ -41,13 +41,18 @@
     const userMsg = chatInput.value
     chatInput.value=''
     isChatting.value=true
-    isThinking.value = true  // 开始思考
+    isThinking.value = true  
 
-    // 添加用户消息
+    // A. 先把自己说的话上屏
     chatHistory.value.push({
       role: 'user',
       content: userMsg
     })
+
+    const historyToSend = chatHistory.value.slice(-20).map(msg => ({
+      role: msg.role,
+      content: msg.content.trim()
+    }))
     // 添加AI消息（初始为空）
     const aiMsgIndex = chatHistory.value.length
     chatHistory.value.push({
@@ -61,7 +66,7 @@
       const response = await fetch('https://api.liberflux.top/chat', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({message:userMsg})
+        body:JSON.stringify({history: historyToSend})
       })
       if (!response.ok) {
         throw new Error('网络请求失败')
@@ -87,7 +92,7 @@
       }
     } catch (e) {
       isThinking.value = false  // 出错时也要结束思考状态
-      chatHistory.value[aiMsgIndex].content = '喵？出错了，请重试喵~'
+      chatHistory.value[aiMsgIndex].content = '喵呜...脑子短路了，请重试喵~'
     } finally{
       isChatting.value = false
       scrollToBottom()
@@ -183,7 +188,7 @@
         <div v-for="(msg, i) in chatHistory" :key="i" 
              class="msg-row" :class="msg.role === 'user' ? 'msg-right' : 'msg-left'">
           
-          <div class="bubble" :class="msg.role === 'user' ? 'bubble-user' : 'bubble-ai'">
+          <div class="bubble" :class="msg.role === 'user' ? 'bubble-user' : 'bubble-assistant'">
               <!-- 如果是AI消息且正在思考且内容为空，显示思考提示 -->
               <template v-if="msg.role === 'assistant' && isThinking && msg.content === ''&& chatHistory[chatHistory.length - 1] === msg">
                 🐱 正在思考喵...
@@ -359,7 +364,7 @@
 }
 
 /* 猫娘气泡 (粉色) */
-.bubble-ai {
+.bubble-assistant {
   background: #fff;
   color: #333;
   border-color: #ffb6c1; /* 浅粉色边框 */
@@ -367,7 +372,7 @@
   border-top-left-radius: 4px;
 }
 /* 猫娘气泡尖角 (用 CSS 画三角形) */
-.bubble-ai::before {
+.bubble-assistant::before {
   content: '';
   position: absolute;
   left: -18px; top: 15px;
@@ -376,7 +381,7 @@
   border-color: transparent #ffb6c1 transparent transparent;
   z-index: 1;
 }
-.bubble-ai::after {
+.bubble-assistant::after {
   content: '';
   position: absolute;
   left: -13px; top: 15px;
