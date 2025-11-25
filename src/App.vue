@@ -2,6 +2,7 @@
   import { ref ,onMounted,nextTick } from 'vue' 
   // 引入漂亮的图标
   import { User, Service, Refresh, Position, ChatLineRound, Trophy,Delete } from '@element-plus/icons-vue'
+  import MarkdownIt from 'markdown-it' // 👈 新增
   // 1.基础数据
   const count = ref(0)
   const name = ref("")
@@ -9,6 +10,11 @@
   const catImage = ref('')
   const isLoading = ref(false)
   const isThinking = ref(false)
+  // md
+  const md = new MarkdownIt({
+  linkify: true, // 允许识别网址自动变链接
+  breaks: true   // 允许换行
+})
   // 2.聊天数据
   const chatInput=ref('')
   const isChatting =ref(false)
@@ -33,7 +39,10 @@
       isLoading.value = false
     }
   }
-
+  // 👇 新增一个函数，专门用来在 HTML 里调用
+  const renderMarkdown = (text) => {
+    return md.render(text || '')
+  }
   // --- AI 聊天功能（json模式） ---
   async function sendMessage(){
     if (!chatInput.value.trim()) return
@@ -195,7 +204,7 @@
               </template>
               <!-- 否则显示实际内容 -->
               <template v-else>
-                {{ msg.content }}
+                <div v-html="renderMarkdown(msg.content)"></div>
               </template>
           </div>
         </div>
@@ -419,6 +428,23 @@
   z-index: 2;
 }
 
+/* ✅ 新增：Markdown 样式修正 */
+/* :deep() 是为了穿透 v-html 生成的内容 */
+.bubble :deep(p) {
+  margin: 0; /* 去掉段落默认的间距 */
+  padding: 0;
+  display: inline; /* 让文字紧凑 */
+}
+
+.bubble :deep(strong) {
+  font-weight: bold; /* 确保加粗显示 */
+  color: #ff1493; /* 给加粗文字一点特别的颜色(可选)，比如深粉色 */
+}
+
+.bubble :deep(a) {
+  color: #409eff; /* 链接颜色 */
+  text-decoration: underline;
+}
 
 .input-box {
   padding: 20px;
