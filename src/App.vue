@@ -128,10 +128,31 @@
     logs.value.unshift("🔄 能量归零啦")
   }
 
+  // --- 新增：加载历史记录 ---
+  async function loadHistory() {
+    try {
+      const res = await fetch('https://api.liberflux.top/history')
+      const data = await res.json()
+      
+      // 如果数据库有数据，就覆盖默认的开场白
+      if (data.history && data.history.length > 0) {
+        // 数据库存的 role 是 'user'/'assistant'
+        // 我们直接用就行，因为前端已经适配了 assistant
+        chatHistory.value = data.history.map(item => ({
+          role: item.role,
+          content: item.content
+        }))
+        scrollToBottom()
+      }
+    } catch (e) {
+      console.log("加载历史失败", e)
+    }
+  }
+
   // 使用 onMounted() ,页面加载完成，自动执行一些初始化操作
   onMounted(()=>{
-    console.log('网页加载完毕，自动抓第一只猫...')
     getCat()
+    loadHistory() // 新增：加载聊天记录
   })
 </script>
 
