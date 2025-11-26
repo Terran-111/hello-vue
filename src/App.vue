@@ -151,7 +151,7 @@
   // --- 新增：加载历史记录 ---
   async function loadHistory() {
     try {
-      const res = await fetch('https://api.liberflux.top/history?session_id=${sessionId.value}')
+      const res = await fetch(`https://api.liberflux.top/history?session_id=${sessionId.value}`)
       const data = await res.json()
       
       // 如果数据库有数据，就覆盖默认的开场白
