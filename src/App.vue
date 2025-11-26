@@ -1,8 +1,9 @@
 <script setup>
   import { ref ,onMounted,nextTick } from 'vue' 
   // 引入漂亮的图标
-  import { User, Service, Refresh, Position, ChatLineRound, Trophy,Delete } from '@element-plus/icons-vue'
+  import { User, Refresh, Trophy,Delete } from '@element-plus/icons-vue'
   import MarkdownIt from 'markdown-it' // 👈 新增
+
   // 1.基础数据
   const count = ref(0)
   const name = ref("")
@@ -22,6 +23,22 @@
     { role: 'assistant', content: '喵？我是你的 AI 助手，有什么想聊的吗？' }
   ])
   const chatBoxRef = ref(null)
+
+  // --- NEW: 用户身份证 ID ---
+  const sessionId = ref('')
+
+  // 获取或生成 Session ID
+  function initSession() {
+    let storedId = localStorage.getItem('chat_session_id')
+    if (!storedId) {
+      // 如果没有，就生成一个随机的 (简易版UUID生成)
+      storedId = crypto.randomUUID()
+      localStorage.setItem('chat_session_id', storedId)
+    }
+    sessionId.value = storedId
+    console.log("当前用户ID:", sessionId.value)
+  }
+  
   // 3.抓猫逻辑
   async function getCat(){
     isLoading.value = true
@@ -75,7 +92,10 @@
       const response = await fetch('https://api.liberflux.top/chat', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({history: historyToSend})
+        body: JSON.stringify({ 
+          history: historyToSend,
+          session_id: sessionId.value // 👈 传身份证
+        })
       })
       if (!response.ok) {
         throw new Error('网络请求失败')
@@ -131,7 +151,7 @@
   // --- 新增：加载历史记录 ---
   async function loadHistory() {
     try {
-      const res = await fetch('https://api.liberflux.top/history')
+      const res = await fetch('https://api.liberflux.top/history?session_id=${sessionId.value}')
       const data = await res.json()
       
       // 如果数据库有数据，就覆盖默认的开场白
@@ -151,6 +171,7 @@
 
   // 使用 onMounted() ,页面加载完成，自动执行一些初始化操作
   onMounted(()=>{
+    initSession()
     getCat()
     loadHistory() // 新增：加载聊天记录
   })
