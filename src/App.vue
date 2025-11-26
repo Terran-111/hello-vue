@@ -58,7 +58,7 @@
       content: userMsg
     })
 
-    const historyToSend = chatHistory.value.slice(-20).map(msg => ({
+    const historyToSend = chatHistory.value.slice(-50).map(msg => ({
       role: msg.role,
       content: msg.content.trim()
     }))
